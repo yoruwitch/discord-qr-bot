@@ -1,13 +1,18 @@
-const fs = require("node:fs");
-const path = require("node:path");
-const {
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import {
   Client,
   Collection,
   Events,
   GatewayIntentBits,
   MessageFlags,
-} = require("discord.js");
-require("dotenv").config();
+} from "discord.js";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const token = process.env.DISCORD_TOKEN;
 
 // Create a new client instance
@@ -24,29 +29,34 @@ client.once(Events.ClientReady, (readyClient) => {
 client.login(token);
 
 client.commands = new Collection();
-client.commands = new Collection();
 
 const foldersPath = path.join(__dirname, "commands");
 const commandFolders = fs.readdirSync(foldersPath);
 
-for (const folder of commandFolders) {
-  const commandsPath = path.join(foldersPath, folder);
-  const commandFiles = fs
-    .readdirSync(commandsPath)
-    .filter((file) => file.endsWith(".js"));
-  for (const file of commandFiles) {
-    const filePath = path.join(commandsPath, file);
-    const command = require(filePath);
-    // Set a new item in the Collection with the key as the command name and the value as the exported module
-    if ("data" in command && "execute" in command) {
-      client.commands.set(command.data.name, command);
-    } else {
-      console.log(
-        `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`
+async function loadCommands() {
+  for (const folder of commandFolders) {
+    const commandsPath = path.join(foldersPath, folder);
+    const commandFiles = fs
+      .readdirSync(commandsPath)
+      .filter((file) => file.endsWith(".js"));
+    for (const file of commandFiles) {
+      const filePath = path.join(commandsPath, file);
+      const command = await import(`file://${filePath}`).then(
+        (m) => m.default || m
       );
+      // Set a new item in the Collection with the key as the command name and the value as the exported module
+      if ("data" in command && "execute" in command) {
+        client.commands.set(command.data.name, command);
+      } else {
+        console.log(
+          `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`
+        );
+      }
     }
   }
 }
+
+loadCommands();
 
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return; 
