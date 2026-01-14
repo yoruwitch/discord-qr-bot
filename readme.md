@@ -22,7 +22,7 @@ This project was created as part of the [CodeMentor Discord Bot QR Code Generato
 - **QR Code Generation**: Generate QR codes from text or URLs
 - **User Information**: Display user profile information
 - **Server Information**: Get server details and statistics
-- **Ping Command**: Check bot latency and connection status
+- **Ping Command**: Simply check bot responsiveness
 - **Modular Architecture**: Easy-to-extend command structure
 - **ESLint Integration**: Code quality and style checking
 
