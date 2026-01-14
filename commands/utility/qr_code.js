@@ -1,6 +1,16 @@
 import { SlashCommandBuilder, AttachmentBuilder } from "discord.js";
 import QRCode from "qrcode";
 
+import http from 'http';
+
+//For deploying online:
+http
+  .createServer((req, res) => {
+    res.write("Bot is online!");
+    res.end();
+  })
+  .listen(8080);
+
 export default {
   data: new SlashCommandBuilder()
     .setName("qrcode")
