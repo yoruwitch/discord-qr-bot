@@ -4,6 +4,7 @@ A powerful Discord bot that generates QR codes and provides utility commands for
 
 ## 📋 Table of Contents
 
+- [About](#about)
 - [Features](#features)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
@@ -14,7 +15,9 @@ A powerful Discord bot that generates QR codes and provides utility commands for
 - [Development](#development)
 - [License](#license)
 
-## ✨ Features
+## 📖 About
+
+This project was created as part of the [CodeMentor Discord Bot QR Code Generator Challenge](https://www.codementor.io/projects/tool/discord-bot-qr-code-generator-cgkm8b16qf/solutions). It's a practical exercise in building Discord bots with Node.js, demonstrating how to create slash commands, handle interactions, and integrate external libraries for QR code generation.
 
 - **QR Code Generation**: Generate QR codes from text or URLs
 - **User Information**: Display user profile information
