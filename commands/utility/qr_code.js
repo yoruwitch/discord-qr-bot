@@ -1,10 +1,12 @@
-const { SlashCommandBuilder, AttachmentBuilder } = require("discord.js");
-const QRCode = require("qrcode");
+import { SlashCommandBuilder, AttachmentBuilder } from "discord.js";
+import QRCode from "qrcode";
 
-module.exports = {
+export default {
   data: new SlashCommandBuilder()
     .setName("qrcode")
-    .setDescription("Generates a QR Code to whatever the user describes or a link")
+    .setDescription(
+      "Generates a QR Code to whatever the user describes or a link"
+    )
     // Adicionamos um campo para o usuário digitar o conteúdo
     .addStringOption((option) =>
       option

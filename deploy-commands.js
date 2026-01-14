@@ -1,40 +1,56 @@
-const { REST, Routes } = require("discord.js");
-const fs = require("node:fs");
-const path = require("node:path");
+import { REST, Routes } from "discord.js";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import dotenv from "dotenv";
 
-require("dotenv").config();
-const { clientId, guildId, token } = process.env.DISCORD_TOKEN;
+dotenv.config();
 
-const commands = [];
-// Grab all the command folders from the commands directory you created earlier
-const foldersPath = path.join(__dirname, "commands");
-const commandFolders = fs.readdirSync(foldersPath);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const {
+  DISCORD_TOKEN: token,
+  CLIENT_ID: clientId,
+  GUILD_ID: guildId,
+} = process.env;
 
-for (const folder of commandFolders) {
-  // Grab all the command files from the commands directory you created earlier
-  const commandsPath = path.join(foldersPath, folder);
-  const commandFiles = fs
-    .readdirSync(commandsPath)
-    .filter((file) => file.endsWith(".js"));
-  // Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
-  for (const file of commandFiles) {
-    const filePath = path.join(commandsPath, file);
-    const command = require(filePath);
-    if ("data" in command && "execute" in command) {
-      commands.push(command.data.toJSON());
-    } else {
-      console.log(
-        `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`
+async function loadCommands() {
+  const commands = [];
+  // Grab all the command folders from the commands directory you created earlier
+  const foldersPath = path.join(__dirname, "commands");
+  const commandFolders = fs.readdirSync(foldersPath);
+
+  for (const folder of commandFolders) {
+    // Grab all the command files from the commands directory you created earlier
+    const commandsPath = path.join(foldersPath, folder);
+    const commandFiles = fs
+      .readdirSync(commandsPath)
+      .filter((file) => file.endsWith(".js"));
+    // Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
+    for (const file of commandFiles) {
+      const filePath = path.join(commandsPath, file);
+      const command = await import(`file://${filePath}`).then(
+        (m) => m.default || m
       );
+      if ("data" in command && "execute" in command) {
+        commands.push(command.data.toJSON());
+      } else {
+        console.log(
+          `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`
+        );
+      }
     }
   }
+
+  return commands;
 }
 
-// Construct and prepare an instance of the REST module
-const rest = new REST().setToken(token);
+async function deployCommands() {
+  const commands = await loadCommands();
 
-// and deploy your commands!
-(async () => {
+  // Construct and prepare an instance of the REST module
+  const rest = new REST().setToken(token);
+
+  // and deploy your commands!
   try {
     console.log(
       `Started refreshing ${commands.length} application (/) commands.`
@@ -53,9 +69,6 @@ const rest = new REST().setToken(token);
     // And of course, make sure you catch and log any errors!
     console.error(error);
   }
-})();
+}
 
-await rest.put(
-  Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
-  { body: commands }
-);
+deployCommands();
